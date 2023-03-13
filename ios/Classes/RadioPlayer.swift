@@ -17,7 +17,12 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     var interruptionObserverAdded: Bool = false
 
     func setMediaItem(_ streamTitle: String, _ streamUrl: String) {
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = [MPMediaItemPropertyTitle: streamTitle, ]
+    var songInfo = [:] as [String : Any]
+            songInfo[MPMediaItemPropertyTitle] = streamTitle
+            if #available(iOS 10.0, *) {
+                            songInfo[MPNowPlayingInfoPropertyIsLiveStream] = true
+                        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
         defaultArtwork = nil
         metadataArtwork = nil
         playerItem = AVPlayerItem(url: URL(string: streamUrl)!)
@@ -97,6 +102,7 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
 
     func stop() {
         player.pause()
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
         player.replaceCurrentItem(with: nil)
     }
 
@@ -120,9 +126,10 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         }
 
         // Pause button.
-        commandCenter.pauseCommand.isEnabled = true
-        commandCenter.pauseCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
+        commandCenter.stopCommand.isEnabled = true
+        commandCenter.stopCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
             self?.pause()
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
             return .success
         }
     }
