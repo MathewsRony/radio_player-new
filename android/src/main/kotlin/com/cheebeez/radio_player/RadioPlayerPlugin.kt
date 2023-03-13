@@ -22,11 +22,11 @@ import io.flutter.plugin.common.BasicMessageChannel
 import io.flutter.plugin.common.BinaryCodec
 import java.nio.ByteBuffer
 import java.io.ByteArrayOutputStream
-import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.Context
 import android.content.ServiceConnection
 import android.content.ComponentName
-import android.content.IntentFilter
 import android.content.BroadcastReceiver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -49,21 +49,14 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "radio_player")
         channel.setMethodCallHandler(this)
 
-        stateChannel =
-            EventChannel(flutterPluginBinding.binaryMessenger, "radio_player/stateEvents")
+        stateChannel = EventChannel(flutterPluginBinding.binaryMessenger, "radio_player/stateEvents")
         stateChannel.setStreamHandler(stateStreamHandler)
-        metadataChannel =
-            EventChannel(flutterPluginBinding.binaryMessenger, "radio_player/metadataEvents")
+        metadataChannel = EventChannel(flutterPluginBinding.binaryMessenger, "radio_player/metadataEvents")
         metadataChannel.setStreamHandler(metadataStreamHandler)
 
         // Channel for default artwork
-        defaultArtworkChannel = BasicMessageChannel(
-            flutterPluginBinding.binaryMessenger,
-            "radio_player/setArtwork",
-            BinaryCodec.INSTANCE
-        )
-        defaultArtworkChannel.setMessageHandler { message, result ->
-            run {
+        defaultArtworkChannel = BasicMessageChannel(flutterPluginBinding.binaryMessenger, "radio_player/setArtwork", BinaryCodec.INSTANCE)
+        defaultArtworkChannel.setMessageHandler { message, result -> run {
                 val array = message!!.array();
                 val image = BitmapFactory.decodeByteArray(array, 0, array.size);
                 service.setDefaultArtwork(image)
@@ -72,13 +65,8 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
         }
 
         // Channel for metadata artwork
-        metadataArtworkChannel = BasicMessageChannel(
-            flutterPluginBinding.binaryMessenger,
-            "radio_player/getArtwork",
-            BinaryCodec.INSTANCE
-        )
-        metadataArtworkChannel.setMessageHandler { message, result ->
-            run {
+        metadataArtworkChannel = BasicMessageChannel(flutterPluginBinding.binaryMessenger, "radio_player/getArtwork", BinaryCodec.INSTANCE)
+        metadataArtworkChannel.setMessageHandler { message, result -> run {
                 if (service.metadataArtwork == null) {
                     result.reply(null)
                 } else {
@@ -94,11 +82,7 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
 
         // Start service
         intent = Intent(context, RadioPlayerService::class.java)
-        context.bindService(
-            intent,
-            serviceConnection,
-            Context.BIND_AUTO_CREATE or Context.BIND_IMPORTANT
-        )
+        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE or Context.BIND_IMPORTANT)
         context.startService(intent)
     }
 
@@ -131,6 +115,10 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
                 val metadata = call.arguments<ArrayList<String>>()!!
                 service.setMetadata(metadata)
             }
+            "itunes_artwork_parser" -> {
+                val enable = call.arguments<Boolean>()!!
+                service.itunesArtworkParser = enable
+            }
             "ignore_icy" -> {
                 service.ignoreIcy = true
             }
@@ -147,6 +135,7 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
         override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
             val binder = iBinder as RadioPlayerService.LocalBinder
             service = binder.getService()
+            service.context = context
         }
 
         // Called when the connection with the service disconnects unexpectedly.
@@ -161,10 +150,8 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
 
         override fun onListen(arguments: Any?, events: EventSink?) {
             eventSink = events
-            LocalBroadcastManager.getInstance(context).registerReceiver(
-                broadcastReceiver,
-                IntentFilter(RadioPlayerService.ACTION_STATE_CHANGED)
-            )
+            LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, 
+                    IntentFilter(RadioPlayerService.ACTION_STATE_CHANGED))
         }
 
         override fun onCancel(arguments: Any?) {
@@ -176,8 +163,7 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
         private var broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent != null) {
-                    val received =
-                        intent.getBooleanExtra(RadioPlayerService.ACTION_STATE_CHANGED_EXTRA, false)
+                    val received = intent.getBooleanExtra(RadioPlayerService.ACTION_STATE_CHANGED_EXTRA, false)
                     eventSink?.success(received)
                 }
             }
@@ -190,10 +176,8 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
 
         override fun onListen(arguments: Any?, events: EventSink?) {
             eventSink = events
-            LocalBroadcastManager.getInstance(context).registerReceiver(
-                broadcastReceiver,
-                IntentFilter(RadioPlayerService.ACTION_NEW_METADATA)
-            )
+            LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, 
+                    IntentFilter(RadioPlayerService.ACTION_NEW_METADATA))
         }
 
         override fun onCancel(arguments: Any?) {
@@ -205,8 +189,7 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
         private var broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent != null) {
-                    val received =
-                        intent.getStringArrayListExtra(RadioPlayerService.ACTION_NEW_METADATA_EXTRA)
+                    val received = intent.getStringArrayListExtra(RadioPlayerService.ACTION_NEW_METADATA_EXTRA)
                     eventSink?.success(received)
                 }
             }
