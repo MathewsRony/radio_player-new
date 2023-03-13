@@ -94,11 +94,11 @@ class RadioPlayerService : Service(), Player.Listener {
     }
 
     fun setMediaItem(streamTitle: String, streamUrl: String) {
-        mediaItems = runBlocking { 
-                GlobalScope.async { 
-                    parseUrls(streamUrl).map { MediaItem.fromUri(it) }
-                }.await() 
-            }
+        mediaItems = runBlocking {
+            GlobalScope.async {
+                parseUrls(streamUrl).map { MediaItem.fromUri(it) }
+            }.await()
+        }
 
         currentMetadata = null
         defaultArtwork = null
@@ -112,10 +112,10 @@ class RadioPlayerService : Service(), Player.Listener {
         player.addMediaItems(mediaItems)
     }
 
-    fun setMetadata(metadata: ArrayList<String>) { 
+    fun setMetadata(metadata: ArrayList<String>) {
         // Parse artwork from iTunes.
         if (itunesArtworkParser && metadata[2].isEmpty())
-           metadata[2] = parseArtworkFromItunes(metadata[0], metadata[1])
+            metadata[2] = parseArtworkFromItunes(metadata[0], metadata[1])
 
         currentMetadata = metadata
         playerNotificationManager?.invalidate()
@@ -152,14 +152,14 @@ class RadioPlayerService : Service(), Player.Listener {
 
         when (url.substringAfterLast(".")) {
             "pls" -> {
-                 urls = URL(url).readText().lines().filter { 
+                urls = URL(url).readText().lines().filter {
                     it.contains("=http") }.map {
-                        it.substringAfter("=")
-                    }
+                    it.substringAfter("=")
+                }
             }
             "m3u" -> {
                 val content = URL(url).readText().trim()
-                 urls = listOf<String>(content)
+                urls = listOf<String>(content)
             }
             else -> {
                 urls = listOf<String>(url)
@@ -230,14 +230,9 @@ class RadioPlayerService : Service(), Player.Listener {
             .setMediaDescriptionAdapter(mediaDescriptionAdapter)
             .setNotificationListener(notificationListener)
             .build().apply {
-                setUsePlayPauseActions(false)
-                setUseStopAction(true)
+                setUsePlayPauseActions(true)
                 setUseFastForwardAction(false)
-                setUseFastForwardActionInCompactView(false)
                 setUseRewindAction(false)
-                setUseRewindActionInCompactView(false)
-                setUsePreviousActionInCompactView(false)
-                setUseNextActionInCompactView(false)
                 setUsePreviousAction(false)
                 setUseNextAction(false)
                 setPlayer(player)
@@ -286,8 +281,8 @@ class RadioPlayerService : Service(), Player.Listener {
 
         try {
             val url: URL = URL(value)
-            bitmap = runBlocking { 
-                GlobalScope.async { 
+            bitmap = runBlocking {
+                GlobalScope.async {
                     BitmapFactory.decodeStream(url.openStream())
                 }.await()
             }
@@ -302,10 +297,10 @@ class RadioPlayerService : Service(), Player.Listener {
         var artwork: String = ""
 
         try {
-            val term = URLEncoder.encode(artist + " - " + track, "utf-8") 
+            val term = URLEncoder.encode(artist + " - " + track, "utf-8")
 
-            val response = runBlocking { 
-                GlobalScope.async { 
+            val response = runBlocking {
+                GlobalScope.async {
                     URL("https://itunes.apple.com/search?term=" + term + "&limit=1").readText()
                 }.await()
             }
