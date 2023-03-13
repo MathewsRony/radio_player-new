@@ -147,6 +147,9 @@ class RadioPlayerService : Service(), Player.Listener {
 
     fun pause() {
         player.playWhenReady = false
+        val notificationManager: NotificationManager = context
+            .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
     }
 
     /** Extract URLs from user link. */
@@ -233,6 +236,7 @@ class RadioPlayerService : Service(), Player.Listener {
             .setMediaDescriptionAdapter(mediaDescriptionAdapter)
             .setNotificationListener(notificationListener)
             .build().apply {
+                setUsePlayPauseActions(false)
                 setUseStopAction(true)
                 setUseFastForwardAction(false)
                 setUseRewindAction(false)
