@@ -139,11 +139,13 @@ class RadioPlayerService : Service(), Player.Listener {
 
     fun stop() {
         player.playWhenReady = false
+        playerNotificationManager?.setPlayer(null)
         player.stop()
     }
 
     fun pause() {
         player.playWhenReady = false
+        playerNotificationManager?.setPlayer(null)
     }
 
     /** Extract URLs from user link. */
