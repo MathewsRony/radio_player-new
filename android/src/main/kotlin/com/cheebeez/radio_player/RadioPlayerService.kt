@@ -139,6 +139,9 @@ class RadioPlayerService : Service(), Player.Listener {
 
     fun stop() {
         player.playWhenReady = false
+        val notificationManager: NotificationManager = context
+            .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
         player.stop()
     }
 
