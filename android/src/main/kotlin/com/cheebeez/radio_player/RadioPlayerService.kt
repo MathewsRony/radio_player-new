@@ -233,11 +233,14 @@ class RadioPlayerService : Service(), Player.Listener {
                 setUsePlayPauseActions(false)
                 setUseStopAction(true)
                 setUseFastForwardAction(false)
+                setUseFastForwardActionInCompactView(false)
                 setUseRewindAction(false)
+                setUseRewindActionInCompactView(false)
+                setUsePreviousActionInCompactView(false)
+                setUseNextActionInCompactView(false)
                 setUsePreviousAction(false)
                 setUseNextAction(false)
                 setPlayer(player)
-                mediaSession?.let { setMediaSessionToken(it.sessionToken) }
             }
     }
 
