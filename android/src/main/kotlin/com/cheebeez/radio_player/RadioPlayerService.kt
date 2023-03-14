@@ -243,6 +243,7 @@ class RadioPlayerService : Service(), Player.Listener {
                 ongoing: Boolean
             ) {
                 if (ongoing && !isForegroundService) {
+                    startForeground(notificationId, notification)
                     isForegroundService = true
                 } else if (!ongoing) {
                     Log.i("banane", "ongoing")
@@ -269,7 +270,7 @@ class RadioPlayerService : Service(), Player.Listener {
             .setNotificationListener(notificationListener)
             .build().apply {
                 setUsePlayPauseActions(true)
-//                setUseStopAction(true)
+                setUseStopAction(true)
                 setUseFastForwardAction(false)
                 setUseRewindAction(false)
                 setUsePreviousAction(false)
