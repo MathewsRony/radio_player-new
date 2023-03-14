@@ -140,6 +140,7 @@ class RadioPlayerService : Service(), Player.Listener {
 
     fun stop() {
         Log.i("banane", "stop")
+        playerNotificationManager?.setPlayer(null)
         player.playWhenReady = false
         player.stop()
     }
