@@ -149,6 +149,9 @@ class RadioPlayerService : Service(), Player.Listener {
 
     fun pause() {
         Log.i("banane", "pause")
+        stopForeground(true)
+        isForegroundService = false
+        stopSelf()
         player.playWhenReady = false
     }
 
@@ -240,7 +243,6 @@ class RadioPlayerService : Service(), Player.Listener {
                 ongoing: Boolean
             ) {
                 if (ongoing && !isForegroundService) {
-                    startForeground(notificationId, notification)
                     isForegroundService = true
                 } else if (!ongoing) {
                     Log.i("banane", "ongoing")
