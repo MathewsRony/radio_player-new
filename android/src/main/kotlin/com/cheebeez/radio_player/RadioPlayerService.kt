@@ -275,7 +275,6 @@ class RadioPlayerService : Service(), Player.Listener {
                 setUsePreviousAction(false)
                 setUseNextAction(false)
                 setPlayer(player)
-                mediaSession?.let { setMediaSessionToken(it.sessionToken) }
             }
     }
 
