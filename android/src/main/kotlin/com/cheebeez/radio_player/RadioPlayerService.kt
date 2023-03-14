@@ -243,6 +243,7 @@ class RadioPlayerService : Service(), Player.Listener {
                     startForeground(notificationId, notification)
                     isForegroundService = true
                 } else if (!ongoing) {
+                    Log.i("banane", "ongoing")
                     stopForeground(true)
                     isForegroundService = false
                     stopSelf()
@@ -251,6 +252,7 @@ class RadioPlayerService : Service(), Player.Listener {
 
             override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
                 stopForeground(true)
+                Log.i("banane", "onNotificationCancelled")
                 isForegroundService = false
                 stopSelf()
             }
