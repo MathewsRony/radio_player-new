@@ -140,9 +140,6 @@ class RadioPlayerService : Service(), Player.Listener {
 
     fun stop() {
         Log.i("banane", "stop")
-        stopForeground(true)
-        isForegroundService = false
-        stopSelf()
         player.playWhenReady = false
         player.stop()
     }
