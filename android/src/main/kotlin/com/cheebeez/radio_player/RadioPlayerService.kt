@@ -131,6 +131,7 @@ class RadioPlayerService : Service(), Player.Listener {
     }
 
     fun play() {
+        Log.i("banane", "play")
         // Swiping the music player on the notification panel removes the media item.
         if (player.getMediaItemCount() == 0) player.addMediaItems(mediaItems)
 
@@ -138,11 +139,13 @@ class RadioPlayerService : Service(), Player.Listener {
     }
 
     fun stop() {
+        Log.i("banane", "stop")
         player.playWhenReady = false
         player.stop()
     }
 
     fun pause() {
+        Log.i("banane", "pause")
         player.playWhenReady = false
     }
 
@@ -153,7 +156,8 @@ class RadioPlayerService : Service(), Player.Listener {
         when (url.substringAfterLast(".")) {
             "pls" -> {
                 urls = URL(url).readText().lines().filter {
-                    it.contains("=http") }.map {
+                    it.contains("=http")
+                }.map {
                     it.substringAfter("=")
                 }
             }
@@ -173,7 +177,8 @@ class RadioPlayerService : Service(), Player.Listener {
     private fun createNotificationManager() {
         // Setup media session
         val intent = Intent(Intent.ACTION_MEDIA_BUTTON)
-        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent =
+            PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         mediaSession = MediaSessionCompat(context, "RadioPlayerService", null, pendingIntent)
 
         mediaSession?.let {
@@ -194,28 +199,44 @@ class RadioPlayerService : Service(), Player.Listener {
         val mediaDescriptionAdapter = object : MediaDescriptionAdapter {
             override fun createCurrentContentIntent(player: Player): PendingIntent? {
                 val notificationIntent = Intent()
-                notificationIntent.setClassName(context.packageName, "${context.packageName}.MainActivity")
-                return PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                notificationIntent.setClassName(
+                    context.packageName,
+                    "${context.packageName}.MainActivity"
+                )
+                return PendingIntent.getActivity(
+                    context,
+                    0,
+                    notificationIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
             }
+
             override fun getCurrentLargeIcon(player: Player, callback: BitmapCallback): Bitmap? {
                 metadataArtwork = downloadImage(currentMetadata?.get(2))
                 return metadataArtwork ?: defaultArtwork;
             }
+
             override fun getCurrentContentTitle(player: Player): String {
                 return currentMetadata?.get(0) ?: notificationTitle
             }
+
             override fun getCurrentContentText(player: Player): String? {
                 return currentMetadata?.get(1) ?: null
             }
         }
 
         val notificationListener = object : PlayerNotificationManager.NotificationListener {
-            override fun onNotificationPosted(notificationId: Int, notification: Notification, ongoing: Boolean) {
-                if(ongoing && !isForegroundService) {
+            override fun onNotificationPosted(
+                notificationId: Int,
+                notification: Notification,
+                ongoing: Boolean
+            ) {
+                if (ongoing && !isForegroundService) {
                     startForeground(notificationId, notification)
                     isForegroundService = true
                 }
             }
+
             override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
                 stopForeground(true)
                 isForegroundService = false
@@ -224,7 +245,8 @@ class RadioPlayerService : Service(), Player.Listener {
         }
 
         playerNotificationManager = PlayerNotificationManager.Builder(
-            this, NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID)
+            this, NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID
+        )
             .setChannelNameResourceId(R.string.channel_name)
             //.setChannelDescriptionResourceId(R.string.notification_Channel_Description)
             .setMediaDescriptionAdapter(mediaDescriptionAdapter)
@@ -308,8 +330,9 @@ class RadioPlayerService : Service(), Player.Listener {
             val jsonObject = JSONObject(response)
 
             if (jsonObject.getInt("resultCount") > 0) {
-                val artworkUrl30: String = jsonObject.getJSONArray("results").getJSONObject(0).getString("artworkUrl30")
-                artwork = artworkUrl30.replace("30x30bb","500x500bb")
+                val artworkUrl30: String =
+                    jsonObject.getJSONArray("results").getJSONObject(0).getString("artworkUrl30")
+                artwork = artworkUrl30.replace("30x30bb", "500x500bb")
             }
         } catch (e: Throwable) {
             println(e)
