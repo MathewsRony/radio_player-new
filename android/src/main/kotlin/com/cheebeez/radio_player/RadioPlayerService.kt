@@ -140,7 +140,7 @@ class RadioPlayerService : Service(), Player.Listener {
 
     fun stop() {
         Log.i("banane", "stop")
-        playerNotificationManager?.setPlayer(null)
+        stopForeground(true)
         player.playWhenReady = false
         player.stop()
     }
@@ -253,6 +253,7 @@ class RadioPlayerService : Service(), Player.Listener {
             .setMediaDescriptionAdapter(mediaDescriptionAdapter)
             .setNotificationListener(notificationListener)
             .build().apply {
+                setUsePlayPauseActions(true)
                 setUseStopAction(true)
                 setUseFastForwardAction(false)
                 setUseRewindAction(false)
