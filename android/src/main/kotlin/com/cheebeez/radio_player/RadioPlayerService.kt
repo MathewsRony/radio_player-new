@@ -260,7 +260,6 @@ class RadioPlayerService : Service(), Player.Listener {
             //.setChannelDescriptionResourceId(R.string.notification_Channel_Description)
             .setMediaDescriptionAdapter(mediaDescriptionAdapter)
             .setNotificationListener(notificationListener)
-            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .build().apply {
                 setUsePlayPauseActions(false)
                 setUseStopAction(true)
