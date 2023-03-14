@@ -141,6 +141,8 @@ class RadioPlayerService : Service(), Player.Listener {
     fun stop() {
         Log.i("banane", "stop")
         stopForeground(true)
+        isForegroundService = false
+        stopSelf()
         player.playWhenReady = false
         player.stop()
     }
@@ -179,7 +181,12 @@ class RadioPlayerService : Service(), Player.Listener {
         // Setup media session
         val intent = Intent(Intent.ACTION_MEDIA_BUTTON)
         val pendingIntent =
-            PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
         mediaSession = MediaSessionCompat(context, "RadioPlayerService", null, pendingIntent)
 
         mediaSession?.let {
@@ -235,6 +242,10 @@ class RadioPlayerService : Service(), Player.Listener {
                 if (ongoing && !isForegroundService) {
                     startForeground(notificationId, notification)
                     isForegroundService = true
+                } else if (!ongoing) {
+                    stopForeground(true)
+                    isForegroundService = false
+                    stopSelf()
                 }
             }
 
@@ -252,8 +263,9 @@ class RadioPlayerService : Service(), Player.Listener {
             //.setChannelDescriptionResourceId(R.string.notification_Channel_Description)
             .setMediaDescriptionAdapter(mediaDescriptionAdapter)
             .setNotificationListener(notificationListener)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .build().apply {
-                setUsePlayPauseActions(true)
+                setUsePlayPauseActions(false)
                 setUseStopAction(true)
                 setUseFastForwardAction(false)
                 setUseRewindAction(false)
