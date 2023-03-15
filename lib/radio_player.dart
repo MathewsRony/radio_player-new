@@ -5,6 +5,7 @@
  */
 
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -40,6 +41,10 @@ class RadioPlayer {
 
   Future<void> pause() async {
     await _methodChannel.invokeMethod('pause');
+  }
+
+  Future<void> clear() async {
+    await _methodChannel.invokeMethod('clear');
   }
 
   /// Set default image.

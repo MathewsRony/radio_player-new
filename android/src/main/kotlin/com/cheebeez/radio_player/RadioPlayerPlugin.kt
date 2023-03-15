@@ -57,27 +57,27 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
         // Channel for default artwork
         defaultArtworkChannel = BasicMessageChannel(flutterPluginBinding.binaryMessenger, "radio_player/setArtwork", BinaryCodec.INSTANCE)
         defaultArtworkChannel.setMessageHandler { message, result -> run {
-                val array = message!!.array();
-                val image = BitmapFactory.decodeByteArray(array, 0, array.size);
-                service.setDefaultArtwork(image)
-                result.reply(null)
-            }
+            val array = message!!.array();
+            val image = BitmapFactory.decodeByteArray(array, 0, array.size);
+            service.setDefaultArtwork(image)
+            result.reply(null)
+        }
         }
 
         // Channel for metadata artwork
         metadataArtworkChannel = BasicMessageChannel(flutterPluginBinding.binaryMessenger, "radio_player/getArtwork", BinaryCodec.INSTANCE)
         metadataArtworkChannel.setMessageHandler { message, result -> run {
-                if (service.metadataArtwork == null) {
-                    result.reply(null)
-                } else {
-                    val stream = ByteArrayOutputStream()
-                    service.metadataArtwork!!.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-                    val array = stream.toByteArray();
-                    val byteBuffer = ByteBuffer.allocateDirect(array.size);
-                    byteBuffer.put(array)
-                    result.reply(byteBuffer)
-                }
+            if (service.metadataArtwork == null) {
+                result.reply(null)
+            } else {
+                val stream = ByteArrayOutputStream()
+                service.metadataArtwork!!.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                val array = stream.toByteArray();
+                val byteBuffer = ByteBuffer.allocateDirect(array.size);
+                byteBuffer.put(array)
+                result.reply(byteBuffer)
             }
+        }
         }
 
         // Start service
@@ -110,6 +110,9 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
             }
             "pause" -> {
                 service.pause()
+            }
+            "clear" -> {
+                service.clear()
             }
             "metadata" -> {
                 val metadata = call.arguments<ArrayList<String>>()!!
@@ -150,8 +153,8 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
 
         override fun onListen(arguments: Any?, events: EventSink?) {
             eventSink = events
-            LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, 
-                    IntentFilter(RadioPlayerService.ACTION_STATE_CHANGED))
+            LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver,
+                IntentFilter(RadioPlayerService.ACTION_STATE_CHANGED))
         }
 
         override fun onCancel(arguments: Any?) {
@@ -176,8 +179,8 @@ class RadioPlayerPlugin : FlutterPlugin, MethodCallHandler {
 
         override fun onListen(arguments: Any?, events: EventSink?) {
             eventSink = events
-            LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, 
-                    IntentFilter(RadioPlayerService.ACTION_NEW_METADATA))
+            LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver,
+                IntentFilter(RadioPlayerService.ACTION_NEW_METADATA))
         }
 
         override fun onCancel(arguments: Any?) {
